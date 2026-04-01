@@ -1,0 +1,49 @@
+# Entorno virtual
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de entorno
+.env
+
+# VSCode
+.vscode/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Archivos temporales
+*.tmp
+
+# Archivos generados
+*.csv
+
+# PDFs de prueba (opcional)
+*.pdf
+
+# Cache
+.cache/
+
+# SQLite (si usas)
+*.sqlite3
+
+# Pytest
+.pytest_cache/
+
+# Coverage
+.coverage
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Archivos de sistema Linux
+*~
