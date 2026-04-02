@@ -21,20 +21,25 @@ HTML_TEMPLATE = """
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Procesador OC → Softland</title>
+  <title>Procesador OC</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Mono&display=swap');
 
     :root {
-      --bg: #0f1117;
-      --surface: #181c27;
-      --border: #2a2f3e;
-      --accent: #00d4aa;
-      --accent2: #ff6b35;
-      --text: #e2e8f0;
-      --muted: #64748b;
-      --mono: 'IBM Plex Mono', monospace;
-      --sans: 'IBM Plex Sans', sans-serif;
+      --bg:       #F5F4F0;
+      --surface:  #FFFFFF;
+      --border:   rgba(0,0,0,0.10);
+      --border-hover: rgba(0,0,0,0.20);
+      --accent:   #185FA5;
+      --accent-hover: #0C447C;
+      --accent-bg: #E6F1FB;
+      --text:     #1a1a1a;
+      --muted:    #6B6A66;
+      --hint:     #9E9D99;
+      --sans:     'IBM Plex Sans', sans-serif;
+      --mono:     'IBM Plex Mono', monospace;
+      --radius:   10px;
+      --radius-lg: 14px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -45,217 +50,214 @@ HTML_TEMPLATE = """
       font-family: var(--sans);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 2rem;
     }
 
-    .container {
-      width: 100%;
-      max-width: 560px;
-    }
+    .wrap { width: 100%; max-width: 520px; }
 
-    .header {
-      margin-bottom: 2.5rem;
-    }
+    .brand { margin-bottom: 2rem; }
 
-    .tag {
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      color: var(--accent);
-      letter-spacing: 0.15em;
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      margin-bottom: 0.75rem;
+      color: var(--hint);
+      margin-bottom: 6px;
+      font-family: var(--mono);
     }
 
-    h1 {
-      font-size: 1.75rem;
-      font-weight: 600;
-      line-height: 1.2;
-      color: #fff;
-    }
+    h1 { font-size: 24px; font-weight: 500; color: var(--text); }
+    h1 em { font-style: normal; color: var(--accent); }
 
-    h1 span { color: var(--accent); }
-
-    .subtitle {
-      margin-top: 0.5rem;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
+    .sub { font-size: 14px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
 
     .card {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 2rem;
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
-    .field { margin-bottom: 1.5rem; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .field { margin-bottom: 1.25rem; }
 
     label {
       display: block;
-      font-size: 0.75rem;
-      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
       color: var(--muted);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
+      margin-bottom: 6px;
+      letter-spacing: 0.04em;
     }
 
     input[type="text"], input[type="number"] {
       width: 100%;
       background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.65rem 0.9rem;
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.6rem 0.85rem;
       color: var(--text);
-      font-family: var(--mono);
-      font-size: 0.9rem;
-      transition: border-color 0.2s;
+      font-family: var(--sans);
+      font-size: 14px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
     }
 
     input:focus {
-      outline: none;
       border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(24,95,165,0.12);
     }
 
-    .file-zone {
-      border: 2px dashed var(--border);
-      border-radius: 8px;
-      padding: 2rem;
+    .drop {
+      border: 1.5px dashed var(--border-hover);
+      border-radius: var(--radius);
+      padding: 1.5rem;
       text-align: center;
       cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
+      transition: border-color 0.15s, background 0.15s;
       position: relative;
+      background: var(--bg);
     }
 
-    .file-zone:hover, .file-zone.active {
+    .drop:hover, .drop.active {
       border-color: var(--accent);
-      background: rgba(0, 212, 170, 0.04);
+      background: var(--accent-bg);
     }
 
-    .file-zone input[type="file"] {
+    .drop input[type="file"] {
       position: absolute;
       inset: 0;
       opacity: 0;
       cursor: pointer;
     }
 
-    .file-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .drop-icon { font-size: 22px; margin-bottom: 6px; }
 
-    .file-label {
-      font-size: 0.85rem;
+    .drop-text {
+      font-size: 13px;
       color: var(--muted);
     }
 
-    .file-name {
-      font-family: var(--mono);
-      font-size: 0.8rem;
+    .drop-name {
+      font-size: 12px;
       color: var(--accent);
-      margin-top: 0.5rem;
+      margin-top: 4px;
+      font-weight: 500;
+      font-family: var(--mono);
     }
 
     .btn {
       width: 100%;
-      padding: 0.85rem;
+      padding: 0.75rem;
       background: var(--accent);
-      color: #0f1117;
+      color: #fff;
       border: none;
-      border-radius: 8px;
-      font-family: var(--mono);
-      font-size: 0.9rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
+      border-radius: var(--radius);
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 500;
       cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 0.25rem;
     }
 
-    .btn:hover { opacity: 0.9; }
+    .btn:hover { background: var(--accent-hover); }
     .btn:active { transform: scale(0.99); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn:disabled { background: #B4B2A9; cursor: not-allowed; }
 
     .status {
-      margin-top: 1.5rem;
-      padding: 1rem;
-      border-radius: 8px;
-      font-family: var(--mono);
-      font-size: 0.8rem;
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      font-size: 13px;
       display: none;
     }
 
     .status.error {
-      background: rgba(255, 107, 53, 0.1);
-      border: 1px solid rgba(255, 107, 53, 0.3);
-      color: var(--accent2);
+      background: #FCEBEB;
+      color: #A32D2D;
+      border: 0.5px solid #F09595;
     }
 
     .status.success {
-      background: rgba(0, 212, 170, 0.1);
-      border: 1px solid rgba(0, 212, 170, 0.3);
-      color: var(--accent);
+      background: #EAF3DE;
+      color: #3B6D11;
+      border: 0.5px solid #97C459;
     }
 
     .status.loading {
-      background: rgba(100, 116, 139, 0.1);
-      border: 1px solid var(--border);
-      color: var(--muted);
+      background: var(--accent-bg);
+      color: var(--accent-hover);
+      border: 0.5px solid #85B7EB;
     }
 
-    .footer {
-      margin-top: 2rem;
-      font-size: 0.72rem;
-      color: var(--muted);
+    .foot {
+      margin-top: 1.25rem;
+      font-size: 11px;
+      color: var(--hint);
       text-align: center;
       font-family: var(--mono);
     }
+
+    .logo {
+      width: 150px;
+      height: 33px;
+      object-fit: contain;
+      display: block;
+      margin-bottom: 12px;
+}
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="tag">Antilhue · Softland Integration</div>
-      <h1>Procesador <span>OC</span> → CSV</h1>
-      <p class="subtitle">Sube el PDF de orden de compra para generar el archivo listo para Softland</p>
+  <div class="wrap">
+    <img src="/static/logo.png" class="logo" alt="Antilhue">
+
+    <div class="brand">
+      <div class="eyebrow">Antilhue · Softland</div>
+      <h1>Procesador <em>OC</em> → CSV</h1>
+      <p class="sub">Sube la orden de compra en PDF para generar el archivo listo para Softland</p>
     </div>
 
     <div class="card">
-      <div class="field">
-        <label>N° Orden de Compra</label>
-        <input type="text" id="orden" placeholder="ej: 6995" />
-      </div>
-
-      <div class="field">
-        <label>Tasa de Cambio (USD → CLP)</label>
-        <input type="number" id="tasa" placeholder="ej: 930.5" step="0.01" />
+      <div class="row">
+        <div class="field">
+          <label>N° Orden de compra</label>
+          <input type="text" id="orden" placeholder="ej: 6995" />
+        </div>
+        <div class="field">
+          <label>Tasa de cambio (USD)</label>
+          <input type="number" id="tasa" placeholder="ej: 929.9" step="0.01" />
+        </div>
       </div>
 
       <div class="field">
         <label>Archivo PDF</label>
-        <div class="file-zone" id="fileZone">
-          <input type="file" id="pdfFile" accept=".pdf" onchange="updateFileName(this)" />
-          <div class="file-icon">📄</div>
-          <div class="file-label">Arrastra o haz clic para seleccionar el PDF</div>
-          <div class="file-name" id="fileName"></div>
+        <div class="drop" id="zone">
+          <input type="file" id="pdfFile" accept=".pdf" onchange="onFile(this)" />
+          <div class="drop-icon">📄</div>
+          <div class="drop-text">Arrastra o haz clic para seleccionar</div>
+          <div class="drop-name" id="fname"></div>
         </div>
       </div>
 
-      <button class="btn" id="submitBtn" onclick="procesarOC()">
+      <button class="btn" id="btn" onclick="submit()">
         Generar CSV para Softland
       </button>
-
       <div class="status" id="status"></div>
     </div>
 
-    <div class="footer">PDF texto seleccionable · Conexión Odoo vía XML-RPC · v1.0</div>
+    <div class="foot">PDF texto seleccionable · Conexión Odoo XML-RPC · v1.0</div>
   </div>
 
   <script>
-    function updateFileName(input) {
-      const name = input.files[0]?.name || '';
-      document.getElementById('fileName').textContent = name;
-      const zone = document.getElementById('fileZone');
-      zone.classList.toggle('active', !!name);
+    function onFile(el) {
+      const name = el.files[0]?.name || '';
+      document.getElementById('fname').textContent = name;
+      document.getElementById('zone').classList.toggle('active', !!name);
     }
 
     function setStatus(msg, type) {
@@ -265,44 +267,44 @@ HTML_TEMPLATE = """
       el.style.display = 'block';
     }
 
-    async function procesarOC() {
+    async function submit() {
       const orden = document.getElementById('orden').value.trim();
       const tasa  = document.getElementById('tasa').value.trim();
       const file  = document.getElementById('pdfFile').files[0];
 
       if (!orden || !tasa || !file) {
-        setStatus('⚠ Completa todos los campos antes de continuar.', 'error');
+        setStatus('Completa todos los campos antes de continuar.', 'error');
         return;
       }
 
-      const btn = document.getElementById('submitBtn');
+      const btn = document.getElementById('btn');
       btn.disabled = true;
-      setStatus('⏳ Procesando PDF y consultando Odoo...', 'loading');
+      setStatus('Procesando PDF y consultando Odoo...', 'loading');
 
-      const formData = new FormData();
-      formData.append('orden', orden);
-      formData.append('tasa', tasa);
-      formData.append('pdf', file);
+      const fd = new FormData();
+      fd.append('orden', orden);
+      fd.append('tasa', tasa);
+      fd.append('pdf', file);
 
       try {
-        const resp = await fetch('/procesar-oc', { method: 'POST', body: formData });
+        const resp = await fetch('/procesar-oc', { method: 'POST', body: fd });
 
         if (!resp.ok) {
           const err = await resp.json();
-          setStatus('✗ ' + (err.error || 'Error desconocido'), 'error');
+          setStatus(err.error || 'Error desconocido', 'error');
           return;
         }
 
         const blob = await resp.blob();
-        const url  = URL.createObjectURL(blob);
         const a    = document.createElement('a');
-        a.href     = url;
+        a.href     = URL.createObjectURL(blob);
         a.download = `OC_${orden}_softland.csv`;
         a.click();
-        URL.revokeObjectURL(url);
-        setStatus(`✓ CSV generado correctamente para OC ${orden}`, 'success');
+        URL.revokeObjectURL(a.href);
+        setStatus(`CSV generado correctamente — OC ${orden}`, 'success');
+
       } catch (e) {
-        setStatus('✗ Error de red: ' + e.message, 'error');
+        setStatus('Error de red: ' + e.message, 'error');
       } finally {
         btn.disabled = false;
       }
@@ -320,14 +322,10 @@ def index():
 
 @app.route("/procesar-oc", methods=["POST"])
 def procesar_oc():
-    print("🔍 DEBUG request.content_type:", request.content_type)
-    print("🔍 DEBUG files:", [f.filename for f in request.files.values() if f.filename])
-    print("🔍 DEBUG form:", dict(request.form))
-    orden = request.form.get("orden", "").strip()
+    orden    = request.form.get("orden", "").strip()
     tasa_raw = request.form.get("tasa", "").strip()
     pdf_file = request.files.get("pdf")
 
-    # — Validaciones de entrada —
     if not orden:
         return jsonify({"error": "El campo 'orden' es requerido"}), 400
     if not tasa_raw:
@@ -345,22 +343,19 @@ def procesar_oc():
     logger.info(f"[OC:{orden}] Inicio de procesamiento | tasa={equi}")
 
     try:
-        # 1. Extraer líneas crudas del PDF
-        pdf_bytes = pdf_file.read()
-        raw_lines = extract_order_lines(pdf_bytes)
+        pdf_bytes   = pdf_file.read()
+        raw_lines   = extract_order_lines(pdf_bytes)
         logger.info(f"[OC:{orden}] Líneas extraídas del PDF: {len(raw_lines)}")
 
         if not raw_lines:
             return jsonify({"error": "No se encontraron líneas de producto en el PDF"}), 422
 
-        # 2. Parsear y limpiar líneas
         parsed_lines = parse_lines(raw_lines)
         logger.info(f"[OC:{orden}] Líneas parseadas válidas: {len(parsed_lines)}")
 
         if not parsed_lines:
             return jsonify({"error": "No se pudieron parsear líneas válidas del PDF"}), 422
 
-        # 3. Consultar Odoo en batch
         codigos_fabrica = [l["cod_fabrica"] for l in parsed_lines]
         odoo = OdooService(
             url=Config.ODOO_URL,
@@ -369,9 +364,8 @@ def procesar_oc():
             password=Config.ODOO_PASSWORD,
         )
         mapeo_odoo = odoo.buscar_codigos_batch(codigos_fabrica)
-        logger.info(f"[OC:{orden}] Respuesta Odoo: {len(mapeo_odoo)} códigos encontrados de {len(codigos_fabrica)}")
+        logger.info(f"[OC:{orden}] Odoo: {len(mapeo_odoo)} encontrados de {len(codigos_fabrica)}")
 
-        # 4. Generar CSV
         csv_content = build_csv(
             orden=orden,
             equi=equi,
@@ -379,10 +373,8 @@ def procesar_oc():
             mapeo_odoo=mapeo_odoo,
         )
 
-        # 5. Log resumen
         log_processing_summary(logger, orden, parsed_lines, mapeo_odoo)
 
-        # 6. Devolver archivo
         csv_bytes = io.BytesIO(csv_content.encode("utf-8"))
         return send_file(
             csv_bytes,
@@ -392,11 +384,11 @@ def procesar_oc():
         )
 
     except ConnectionError as e:
-        logger.error(f"[OC:{orden}] Error de conexión Odoo: {e}")
+        logger.error(f"[OC:{orden}] Error conexión Odoo: {e}")
         return jsonify({"error": f"No se pudo conectar a Odoo: {str(e)}"}), 503
     except Exception as e:
         logger.exception(f"[OC:{orden}] Error inesperado: {e}")
-        return jsonify({"error": f"Error interno al procesar la OC: {str(e)}"}), 500
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
 
 
 if __name__ == "__main__":
