@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <title>Procesador OC → CSV</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <!-- ── Top bar ── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-wordmark">OC Processor</span>
+      <div class="topbar-sep"></div>
+      <span class="topbar-path">erp-bridge / <span>proc-oc</span></span>
+    </div>
+    <div class="topbar-right">
+      <div class="status-dot">odoo online</div>
+      <button class="theme-toggle" id="theme-toggle" title="Cambiar tema" aria-label="Cambiar tema claro/oscuro">☀</button>
+    </div>
+  </header>
+
+  <!-- ── Body: sidebar + main ── -->
+  <div class="layout">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Herramientas</div>
+
+        <button class="sidebar-item active">
+          <span class="icon">⬡</span>
+          <div class="sidebar-content">
+            <span class="sidebar-title">Procesar OC</span>
+            <span class="sidebar-desc">PDF → CSV Softland</span>
+          </div>
+          <span class="badge">activo</span>
+        </button>
+
+        <button class="sidebar-item">
+          <span class="icon">◈</span>
+          <div class="sidebar-content">
+            <span class="sidebar-title">Historial</span>
+            <span class="sidebar-desc">Últimos procesos</span>
+          </div>
+        </button>
+
+        <button class="sidebar-item">
+          <span class="icon">◎</span>
+          <div class="sidebar-content">
+            <span class="sidebar-title">Configuración</span>
+            <span class="sidebar-desc">Variables y entorno</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Conexiones</div>
+
+        <button class="sidebar-item">
+          <span class="icon">◉</span>
+          <div class="sidebar-content">
+            <span class="sidebar-title">Odoo XML-RPC</span>
+            <span class="sidebar-desc">ERP bridge operativo</span>
+          </div>
+          <span class="badge">ok</span>
+        </button>
+
+        <button class="sidebar-item">
+          <span class="icon">◉</span>
+          <div class="sidebar-content">
+            <span class="sidebar-title">BCCh API</span>
+            <span class="sidebar-desc">Indicadores monetarios</span>
+          </div>
+        </button>
+
+        <button class="sidebar-item">
+          <span class="icon">◉</span>
+          <div class="sidebar-content">
+            <span class="sidebar-title">CSV Builder</span>
+            <span class="sidebar-desc">Softland formatter</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="sidebar-meta">
+        <div class="meta-row">
+          <span>versión</span>
+          <span class="meta-val">v1.0.0</span>
+        </div>
+        <div class="meta-row">
+          <span>entorno</span>
+          <span class="meta-val">docker</span>
+        </div>
+        <div class="meta-row">
+          <span>destino</span>
+          <span class="meta-val">softland</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── Main ── -->
+    <main class="main">
+
+      <div class="page-header">
+        <div class="page-eyebrow">erp-bridge · softland</div>
+        <h1 class="page-title">Procesador <span>OC → CSV</span></h1>
+        <p class="page-sub">Convierte órdenes de compra en PDF al formato CSV compatible con Softland, consultando códigos en Odoo automáticamente.</p>
+      </div>
+
+      <!-- ── Form panel ── -->
+      <div class="content-grid">
+
+        <!-- PANEL PRINCIPAL -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Nueva orden de compra</span>
+            <span class="panel-tag">PDF → CSV</span>
+          </div>
+          <div class="panel-body">
+
+            <div class="form-row">
+              <div class="field">
+                <label for="orden">N° Orden de compra</label>
+                <input type="text" id="orden" placeholder="ej: 6995" autocomplete="off" />
+              </div>
+              <div class="field">
+                <label for="tasa">
+                  Tasa USD/CLP
+                  <span class="lbl-tag" id="dolar-badge"></span>
+                </label>
+                <input type="number" id="tasa" placeholder="cargando..." step="0.01" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Archivo PDF</label>
+              <div class="drop" id="zone">
+                <input type="file" id="pdfFile" accept=".pdf" onchange="onFile(this)" />
+                <div class="drop-icon">⬡</div>
+                <div class="drop-label">
+                  Arrastra aquí o <span>selecciona un PDF</span>
+                </div>
+                <div class="drop-filename" id="fname"></div>
+              </div>
+            </div>
+
+            <button class="btn-submit" id="btn" onclick="submit()">
+              <span class="btn-icon">▶</span>
+              Generar CSV para Softland
+            </button>
+
+            <div class="status" id="status">
+              <div class="spinner" id="status-spinner" style="display:none"></div>
+              <span class="status-prefix" id="status-prefix"></span>
+              <span id="status-msg"></span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SIDEBAR DERECHA -->
+        <div class="status-side">
+
+          <div class="status-card">
+            <div class="status-card-title">DÓLAR OBSERVADO</div>
+            <div class="status-big" id="dolar-big">$--- CLP</div>
+            <div class="status-small">BCCh · actualizado</div>
+          </div>
+
+          <div class="status-card">
+            <div class="status-card-title">ODOO XML-RPC</div>
+            <div class="status-online">Conectado</div>
+            <div class="status-small">latencia 118ms</div>
+          </div>
+
+          <div class="status-card">
+            <div class="status-card-title">CSV BUILDER</div>
+            <div class="status-online">Operativo</div>
+            <div class="status-small">softland formatter</div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ── Log panel ── -->
+      <div class="log-panel">
+        <div class="log-header">stdout · proceso</div>
+        <div class="log-body" id="log-body">
+          <div class="log-line">
+            <span class="ts">00:00</span>
+            <span class="key">estado</span>
+            <span class="val green">listo</span>
+          </div>
+          <div class="log-line">
+            <span class="ts">00:00</span>
+            <span class="key">odoo</span>
+            <span class="val">conectado · XML-RPC</span>
+          </div>
+          <div class="log-line" id="log-dolar">
+            <span class="ts">--:--</span>
+            <span class="key">dólar obs.</span>
+            <span class="val warn">cargando...</span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-left">
+      <span>oc-processor</span>
+      <div class="footer-sep"></div>
+      <span>softland-bridge v1.0</span>
+    </div>
+    <div class="footer-right">
+      <span>docker · flask</span>
+      <div class="footer-sep"></div>
+      <span id="footer-time">--:--</span>
+    </div>
+  </footer>
+
+  <script>
+    // ── Tema claro / oscuro ────────────────────────────
+    (function () {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    })();
+
+    function syncIcon() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      document.getElementById('theme-toggle').textContent = isLight ? '☾' : '☀';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      syncIcon();
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        const next = isLight ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        syncIcon();
+      });
+    });
+
+    // ── Reloj ──────────────────────────────────────────
+    function tick() {
+      const now = new Date();
+      const t = now.toTimeString().slice(0, 5);
+      document.getElementById('footer-time').textContent = t;
+    }
+    tick();
+    setInterval(tick, 10000);
+
+    // ── Log helper ──────────────────────────────────────
+    function addLog(key, val, cls = '') {
+      const now = new Date().toTimeString().slice(0, 5);
+      const lb = document.getElementById('log-body');
+      const line = document.createElement('div');
+      line.className = 'log-line';
+      line.innerHTML = `<span class="ts">${now}</span><span class="key">${key}</span><span class="val ${cls}">${val}</span>`;
+      lb.appendChild(line);
+      lb.scrollTop = lb.scrollHeight;
+    }
+
+    // ── Dólar observado ──────────────────────────────────
+    (async function () {
+      try {
+        const r = await fetch('/dolar-observado');
+        if (r.ok) {
+          const d = await r.json();
+          const val = parseFloat(d.valor).toLocaleString('es-CL');
+          document.getElementById('tasa').value = d.valor;
+          document.getElementById('dolar-badge').textContent = '· BCCh';
+          document.getElementById('dolar-badge').classList.add('dolar-fetched');
+          document.getElementById('dolar-big').textContent = `$${val} CLP`;
+
+          const logDolar = document.getElementById('log-dolar');
+          logDolar.querySelector('.ts').textContent = new Date().toTimeString().slice(0, 5);
+          logDolar.querySelector('.val').textContent = `$${val} CLP`;
+          logDolar.querySelector('.val').className = 'val green';
+        }
+      } catch (e) {
+        const logDolar = document.getElementById('log-dolar');
+        logDolar.querySelector('.val').textContent = 'error al obtener';
+        logDolar.querySelector('.val').className = 'val';
+        addLog('dólar obs.', 'fallo: ' + e.message, 'warn');
+      }
+    })();
+
+    // ── File drop ───────────────────────────────────────
+    function onFile(el) {
+      const name = el.files[0]?.name || '';
+      const fname = document.getElementById('fname');
+      const zone = document.getElementById('zone');
+      fname.textContent = name;
+      zone.classList.toggle('active', !!name);
+      if (name) addLog('archivo', name, '');
+    }
+
+    // ── Status helper ────────────────────────────────────
+    function setStatus(msg, type) {
+      const el = document.getElementById('status');
+      const prefix = document.getElementById('status-prefix');
+      const msgEl = document.getElementById('status-msg');
+      const spinner = document.getElementById('status-spinner');
+
+      el.className = 'status visible ' + type;
+      const labels = { loading: 'INFO', error: 'ERROR', success: 'OK' };
+      prefix.textContent = labels[type] || '';
+      msgEl.textContent = msg;
+      spinner.style.display = type === 'loading' ? 'block' : 'none';
+    }
+
+    // ── Submit ───────────────────────────────────────────
+    async function submit() {
+      const orden = document.getElementById('orden').value.trim();
+      const tasa  = document.getElementById('tasa').value.trim();
+      const file  = document.getElementById('pdfFile').files[0];
+
+      if (!orden || !tasa || !file) {
+        setStatus('Completa todos los campos antes de continuar.', 'error');
+        addLog('validación', 'campos incompletos', 'warn');
+        return;
+      }
+
+      const btn = document.getElementById('btn');
+      btn.disabled = true;
+      setStatus('Procesando PDF y consultando Odoo...', 'loading');
+      addLog('oc', orden, '');
+      addLog('tasa', tasa + ' USD/CLP', '');
+      addLog('estado', 'procesando...', 'warn');
+
+      const fd = new FormData();
+      fd.append('orden', orden);
+      fd.append('tasa', tasa);
+      fd.append('pdf', file);
+
+      try {
+        const resp = await fetch('/procesar-oc', { method: 'POST', body: fd });
+        if (!resp.ok) {
+          const err = await resp.json();
+          setStatus(err.error || 'Error desconocido', 'error');
+          addLog('error', err.error || 'desconocido', 'warn');
+          return;
+        }
+        const blob = await resp.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `OC_${orden}_softland.csv`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        setStatus(`CSV generado correctamente — OC ${orden}`, 'success');
+        addLog('output', `OC_${orden}_softland.csv`, 'green');
+        addLog('estado', 'completado', 'green');
+      } catch (e) {
+        setStatus('Error de red: ' + e.message, 'error');
+        addLog('error', e.message, 'warn');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

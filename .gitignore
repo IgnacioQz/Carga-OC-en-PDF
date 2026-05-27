@@ -1,49 +1,45 @@
-# Entorno virtual
-venv/
-env/
+# ── Entorno ───────────────────────────────────────────────────────────────
+.env
+*.env
+!.env.example
 
-# Python
+# ── Python ────────────────────────────────────────────────────────────────
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 *.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
 
-# Archivos de entorno
-.env
+# ── Virtualenv ────────────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
 
-# VSCode
+# ── Logs ──────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Docker ────────────────────────────────────────────────────────────────
+docker-compose.yml.save
+.dockerignore
+
+# ── IDEs ──────────────────────────────────────────────────────────────────
 .vscode/
-
-# Sistema
+.idea/
+*.swp
+*.swo
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-
-# Archivos temporales
-*.tmp
-
-# Archivos generados
-*.csv
-
-# PDFs de prueba (opcional)
-*.pdf
-
-# Cache
-.cache/
-
-# SQLite (si usas)
-*.sqlite3
-
-# Pytest
+# ── Testing ───────────────────────────────────────────────────────────────
 .pytest_cache/
-
-# Coverage
 .coverage
+htmlcov/
 
-# Jupyter
-.ipynb_checkpoints/
-
-# Archivos de sistema Linux
-*~
+# ── Assets privados ───────────────────────────────────────────────────────
+app/static/logo.png
