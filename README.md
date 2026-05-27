@@ -128,7 +128,7 @@ Cada OC procesada genera un resumen en `oc_processor.log`:
 
 ```bash
 # Clonar el repo
-git clone https://github.com/tu-usuario/oc-processor.git](https://github.com/IgnacioQz/OC-processor
+git clone https://github.com/IgnacioQz/OC-processor
 cd oc-processor
 
 # Configurar variables de entorno
@@ -151,4 +151,4 @@ La interfaz queda disponible en `http://localhost:5000`
 
 **Ignacio Quiero Zepeda**  
 Analista Programador  
-[LinkedIn](#) · [GitHub](#https://github.com/IgnacioQz)
+[LinkedIn](#) · [GitHub](https://github.com/IgnacioQz)
